@@ -9,12 +9,20 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CRUD Mercado',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green, // Mudança da cor primária para verde
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        textTheme: const TextTheme(
+          headline6: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.green, // FAB verde
+        ),
       ),
       home: const MyHomePage(),
     );
@@ -23,6 +31,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -34,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Alimento> _alimentos = [];
   bool _isLoading = false;
+
   Future<void> _loadAlimentos() async {
     setState(() => _isLoading = true);
     final alimentos = await SqlHelper().getAllAlimentos();
@@ -44,7 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _addAlimento() async {
-    // if (_formKey.currentState!.validate()) {
     setState(() => _isLoading = true);
     await SqlHelper().insertAlimento(
       Alimento(nome: "maça", preco: 5),
@@ -52,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _nomeController.clear();
     _precoController.clear();
     await _loadAlimentos();
-    //}
   }
 
   Future<void> _updateAlimento(int id) async {
@@ -79,32 +87,45 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('CRUD Mercado'),
+        backgroundColor: Colors.green, // Cor personalizada para o AppBar
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _alimentos.length,
-              itemBuilder: (context, index) {
-                final alimento = _alimentos[index];
-                return ListTile(
-                  title: Text(alimento.nome),
-                  subtitle:
-                      Text('Preço: R\$${alimento.preco.toStringAsFixed(2)}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _updateAlimento(alimento.id!),
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                itemCount: _alimentos.length,
+                itemBuilder: (context, index) {
+                  final alimento = _alimentos[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    elevation: 3,
+                    child: ListTile(
+                      title: Text(
+                        alimento.nome,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _deleteAlimento(alimento.id!),
+                      subtitle: Text(
+                        'Preço: R\$${alimento.preco.toStringAsFixed(2)}',
+                        style: const TextStyle(color: Colors.green),
                       ),
-                    ],
-                  ),
-                );
-              },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _updateAlimento(alimento.id!),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteAlimento(alimento.id!),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addAlimento,
